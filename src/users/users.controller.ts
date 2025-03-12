@@ -13,9 +13,10 @@ import {
 import { CreateUserDto } from './dtos/create-user.dtos';
 import { GetUsersParamsDto } from './dtos/get-user-params.dtos';
 import { PatchUserDto } from './dtos/patch-user.dto';
-
+import { UsersService } from './providers/users.service';
 @Controller('users')
 export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
   @Get('/:id')
   public getUsers(
     @Param() getUserParamsDto: GetUsersParamsDto,
@@ -26,7 +27,7 @@ export class UsersController {
     console.log('query ', limit);
     console.log('page ', page);
 
-    return `123`;
+    return this.usersService.findAll(getUserParamsDto, limit, page);
   }
   @Post()
   @Header('Cache-Control', 'no-store')
