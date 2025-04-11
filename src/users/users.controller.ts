@@ -186,7 +186,6 @@ export class UsersController {
       checkUpdate: true, // mặc định true, kiểm tra update
       logging: true, // mặc định true, bật/tắt log mặc định của thư viện
     });
-
     const api = await zalo.loginQR(
       {
         userAgent: '', // không bắt buộc
@@ -197,6 +196,37 @@ export class UsersController {
         console.log('qrPath', qrPath);
       },
     );
+    api.listener.on('message', (message) => {
+      console.log('Đang có tin nhắn mới', message);
+    });
+
+    api.listener.start();
     return api;
+  }
+  @Get('/login/multi')
+  public async LoginWithMultiAccount() {
+    const zalo = new Zalo({
+      selfListen: false,
+      checkUpdate: true,
+      logging: false,
+    });
+
+    const loggedInAccounts = [];
+
+    async function app() {
+      const api = await zalo.loginQR({}, (qrPath: any) => {
+        console.log(`Quét mã tại để đăng nhập`, qrPath);
+      });
+      api.listener.start();
+      const ownId = api.getOwnId();
+      console.log(`Đã đăng nhập vào tài khoản ${ownId}`);
+      loggedInAccounts.push(ownId);
+    }
+
+    for (let i = 0; i < 4; i++) {
+      await app();
+    }
+
+    return loggedInAccounts;
   }
 }
